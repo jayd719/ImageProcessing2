@@ -22,7 +22,7 @@ def remove_borders(stitched_img):
 if __name__ == "__main__":
     panorama_input = []
     for input_image in sorted(os.listdir(DIRECTORY)):
-        if input_image.endswith(('.png', '.jpg', '.jpeg')):
+        if input_image.endswith(('.png', '.jpg', '.jpeg')) and "Panorama" not in input_image:
             file_path = os.path.join(DIRECTORY, input_image)
             img = cv.imread(file_path)
             img = cv.resize(img, (2000, 1000))
