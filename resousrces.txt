@@ -1,0 +1,9 @@
+https://www.youtube.com/watch?v=mMfnC9YOx8I
+
+https://docs.opencv.org/3.4/dc/dc3/tutorial_py_matcher.html
+
+o construct our image panorama, we’ll utilize computer vision and image processing techniques such as: keypoint detection and local invariant descriptors; keypoint matching; RANSAC; and perspective warping.
+
+
+https://pyimagesearch.com/2016/01/11/opencv-panorama-stitching/
+https://kushalvyas.github.io/stitching.html

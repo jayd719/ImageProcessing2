@@ -45,6 +45,6 @@ def convert_to_jpg(directory: str):
 
 # Entry Point
 if __name__ == "__main__":
-    convert_to_jpg("./Objects")
+    # convert_to_jpg("./Objects")
     convert_to_jpg("./Panorama")
-    convert_to_jpg("./Scenes")
+    # convert_to_jpg("./Scenes")
