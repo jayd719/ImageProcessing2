@@ -17,6 +17,8 @@ from sklearn.cluster import DBSCAN
 DIRECTORY = "./Panorama"
 OBJECTS_DIRECTORY = "./Objects"
 
+
+
 object_names = [
     "speed stick",
     "seasoning",
@@ -51,7 +53,7 @@ def detect_and_describe(image):
     return keypoints, descriptors
 
 
-def match_keypoints(descriptors1, descriptors2, ratio=0.46):
+def match_keypoints(descriptors1, descriptors2, ratio=0.50):
     """
     -------------------------------------------------------
     Matches descriptors between two images using FLANN-based matcher.
@@ -221,11 +223,12 @@ if __name__ == "__main__":
     # cv.waitKey(0)
     # cv.destroyAllWindows()
 
+    
     pano_kp, pano_des = detect_and_describe(stitched_image)
     for i, objectImageFile in enumerate(sorted(os.listdir(OBJECTS_DIRECTORY))):
 
         objectImage = cv.imread(os.path.join(OBJECTS_DIRECTORY, objectImageFile))
-        obj_kp, obj_des = detect_and_describe(objectImage)
+        obj_kp, obj_des = detect_and_describe(cv.GaussianBlur(objectImage,(9,9),9))
 
         matches = match_keypoints(obj_des, pano_des)
 
