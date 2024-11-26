@@ -4,33 +4,7 @@ import os
 
 
 # Constants
-DIRECTORY = "./Panorama"
-
-
-def remove_borders(stitched_img):
-    """
-    -------------------------------------------------------
-    Removes unnecessary borders from the stitched image.
-    Use: cropped_img = remove_borders(stitched_img)
-    -------------------------------------------------------
-    Parameters:
-        stitched_img - the stitched panorama image (numpy.ndarray)
-    Returns:
-        cropped_img - the cropped panorama image with borders removed (numpy.ndarray)
-    -------------------------------------------------------
-    """
-    stitched_img = cv.copyMakeBorder(
-        stitched_img, 10, 10, 10, 10, cv.BORDER_CONSTANT, (0, 0, 0)
-    )
-    gray = cv.cvtColor(stitched_img, cv.COLOR_BGR2GRAY)
-    _, thresh_img = cv.threshold(gray, 10, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
-    contours, _ = cv.findContours(thresh_img, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-    if not contours:
-        raise ValueError("No contours found in the image.")
-    largest_contour = max(contours, key=cv.contourArea)
-    x, y, w, h = cv.boundingRect(largest_contour)
-    cropped_img = stitched_img[y:y + h, x:x + w]
-    return cropped_img
+DIRECTORY = "./Panorama_Testing/TestSet2/"
 
 
 def detect_and_describe(image):
@@ -108,7 +82,8 @@ def compute_homography(kp1, kp2, matches):
     H, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, 5.0)
     return H, mask
 
-def draw_matches(i,img1,img2,kp1,kp2,good):
+
+def draw_matches(i, img1, img2, kp1, kp2, good):
     """
     -------------------------------------------------------
     Draws matches between two images using their keypoints and match results.
@@ -124,12 +99,16 @@ def draw_matches(i,img1,img2,kp1,kp2,good):
     Returns:
         None
     -------------------------------------------------------"""
-    output_path = os.path.join("./Keypoints",f"S{i}-S{i+1}.jpg")
+    output_path = os.path.join("./Keypoints", f"S{i}-S{i+1}.jpg")
     img3 = cv.drawMatches(img1,kp1,img2,kp2,good,None,flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-    cv.imwrite(output_path,img3)
+    cv.imwrite(output_path, img3)
 
 
-def warp_and_stitch(image1, image2, homography):
+import cv2 as cv
+import numpy as np
+
+
+def stitch_images(img1, img2, homography):
     """
     -------------------------------------------------------
     Warps the second image onto the first image using the homography matrix.
@@ -144,23 +123,30 @@ def warp_and_stitch(image1, image2, homography):
         stitched_img - the stitched panorama image (numpy.ndarray)
     -------------------------------------------------------
     """
-    h1, w1 = image1.shape[:2]
-    h2, w2 = image2.shape[:2]
+    corners = np.array(
+        [[0, 0], [0, img2.shape[0]], [img2.shape[1], img2.shape[0]], [img2.shape[1], 0]]
+    )
+    transformed_corners = cv.perspectiveTransform(np.float32([corners]), homography)
+    min_x = int(min(transformed_corners[0][:, 0].min(), 0))
+    max_x = int(max(transformed_corners[0][:, 0].max(), img1.shape[1]))
+    min_y = int(min(transformed_corners[0][:, 1].min(), 0))
+    max_y = int(max(transformed_corners[0][:, 1].max(), img1.shape[0]))
 
-    new_width = w1 + w2  
-    new_height = max(h1, h2)  
-    stitched_canvas = cv.warpPerspective(image1, homography, (new_width, new_height)) 
-    
-    stitched_canvas[0:h2, 0:w2] = image2
-    return stitched_canvas
+    width = max_x - min_x
+    height = max_y - min_y
 
+    translation_matrix = np.array([[1, 0, -min_x], [0, 1, -min_y], [0, 0, 1]])
 
+    stitched_image = cv.warpPerspective(img2, translation_matrix @ homography, (width, height))
+    stitched_image[-min_y : img1.shape[0] - min_y, -min_x : img1.shape[1] - min_x] = (img1)
+
+    return stitched_image
 
 
 if __name__ == "__main__":
     panorama_input = []
     for input_image in sorted(os.listdir(DIRECTORY)):
-        if input_image.endswith((".png", ".jpg", ".jpeg")) and "Panorama" not in input_image:
+        if (input_image.endswith((".png", ".jpg", ".jpeg"))and "Panorama" not in input_image):
             file_path = os.path.join(DIRECTORY, input_image)
             img = cv.imread(file_path)
             panorama_input.append(img)
@@ -178,20 +164,24 @@ if __name__ == "__main__":
         kp2, des2 = detect_and_describe(img2)
 
         matches = match_keypoints(des1, des2)
-        
+
         if len(matches) < 10:
             print(f"Not enough matches for image S{i}.jpg")
             continue
 
-        draw_matches(i,img1,img2,kp1,kp2,matches)
-        
+        draw_matches(i, img1, img2, kp1, kp2, matches)
+
         homography, _ = compute_homography(kp1, kp2, matches)
         # warped_image = warp_and_stitch(img2, img1, homography)
-        # stitched_image = remove_borders(stitched_image)
-        warped_image = cv.warpPerspective(img1, homography, (img2.shape[1], img2.shape[0]))
-        stitched_image = cv.addWeighted(warped_image, .5, img2, .5, 0)
+        # warped_image = cv.warpPerspective(img1, homography, (img2.shape[1], img2.shape[0]),flags=cv.INTER_LINEAR)
+        #
 
-        cv.imshow('Intermediate Result', stitched_image)
+        # Apply panorama correction
+        width = img1.shape[1] + img2.shape[1]
+        height = img2.shape[0] + img1.shape[0]
+
+        stitched_image = stitch_images(img2, img1, homography)
+        cv.imshow("Intermediate Result", stitched_image)
         cv.waitKey(0)
         cv.destroyAllWindows()
 
