@@ -11,7 +11,7 @@ __updated__ = "2024-11-20"
 import cv2 as cv
 import numpy as np
 import os
-from sklearn.cluster import DBSCAN
+from random import randint
 
 # Constants
 DIRECTORY = "./Panorama"
@@ -229,7 +229,7 @@ if __name__ == "__main__":
     pano_kp, pano_des = detect_and_describe(stitched_image)
     for i, objectImageFile in enumerate(sorted(os.listdir(OBJECTS_DIRECTORY))):
         objectImage = cv.imread(os.path.join(OBJECTS_DIRECTORY, objectImageFile))
-        obj_kp, obj_des = detect_and_describe(cv.GaussianBlur(objectImage,(9, 9), 3))
+        obj_kp, obj_des = detect_and_describe(cv.GaussianBlur(objectImage,(11, 11), 4))
 
         matches = match_keypoints(obj_des, pano_des)
 
@@ -244,15 +244,15 @@ if __name__ == "__main__":
         
 
         x, y, w, h = cv.boundingRect(np.int32(dst))
-        stitched_image = cv.rectangle(stitched_image, (x, y), (x + w, y + h), (0,255, 0), 3, cv.LINE_AA)
+        stitched_image = cv.rectangle(stitched_image, (x, y), (x + w, y + h), (randint(1,255),randint(1,255), randint(1,255)), 5, cv.LINE_AA)
         cv.putText(
             stitched_image,
             object_names[i],
-            (x+20, y- 30),
+            (x+20, y+ 30),
             cv.FONT_HERSHEY_TRIPLEX,
-            1.0,
-            (0,0, 255),
-            2,
+            1.25,
+            (0,0, 0),
+            3,
         )
         # Match objects to the scene
     output_path = os.path.join(DIRECTORY, "Panorama_bb.jpg")
