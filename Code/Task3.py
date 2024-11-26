@@ -1,7 +1,18 @@
+"""
+-------------------------------------------------------
+CP467 Project: Task 3
+Image Stitching
+-------------------------------------------------------
+Author:  Jashandeep Singh
+__updated__ = "2024-11-20"
+-------------------------------------------------------
+"""
+
 import cv2 as cv
 import numpy as np
 import os
 from Task2 import object_names, match_with_bounding_box
+
 # Constants
 DIRECTORY = "../Panorama"
 OBJECTS_DIRECTORY = "../Objects"
@@ -103,7 +114,7 @@ def draw_matches(i, img1, img2, kp1, kp2, good):
     Returns:
         None
     -------------------------------------------------------"""
-    output_path = os.path.join("./Keypoints", f"S{i}-S{i+1}.jpg")
+    output_path = os.path.join("../Keypoints", f"S{i}-S{i+1}.jpg")
     img3 = cv.drawMatches(
         img1,
         kp1,
@@ -222,3 +233,5 @@ if __name__ == "__main__":
             )
     output_path = os.path.join(DIRECTORY, "Panorama_bb.jpg")
     cv.imwrite(output_path, stitched_image)
+    print("Panorama_bb created successfully:", output_path)
+    print("-" * 20)
