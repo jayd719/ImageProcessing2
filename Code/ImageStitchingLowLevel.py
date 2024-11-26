@@ -11,8 +11,6 @@ def remove_borders(stitched_img):
     """
     -------------------------------------------------------
     Removes unnecessary borders from the stitched image.
-    Adds a small border to help identify the largest contour
-    and crops the image to the bounding box of the largest contour.
     Use: cropped_img = remove_borders(stitched_img)
     -------------------------------------------------------
     Parameters:
@@ -60,7 +58,6 @@ def match_keypoints(descriptors1, descriptors2, ratio=0.75):
     """
     -------------------------------------------------------
     Matches descriptors between two images using FLANN-based matcher.
-    Applies Lowe's ratio test to filter out unreliable matches.
     Use: good_matches = match_keypoints(descriptors1, descriptors2, ratio)
     -------------------------------------------------------
     Parameters:
@@ -78,6 +75,7 @@ def match_keypoints(descriptors1, descriptors2, ratio=0.75):
     flann = cv.FlannBasedMatcher(index_params, search_params)
     matches = flann.knnMatch(descriptors1, descriptors2, k=2)
 
+    # Apply ratio test
     good_matches = []
     for m, n in matches:
         if m.distance < ratio * n.distance:
@@ -89,7 +87,6 @@ def compute_homography(kp1, kp2, matches):
     """
     -------------------------------------------------------
     Computes the homography matrix using RANSAC from matched keypoints.
-    Extracts matched points from the input keypoints.
     Use: H, mask = compute_homography(kp1, kp2, matches)
     -------------------------------------------------------
     Parameters:
@@ -109,6 +106,26 @@ def compute_homography(kp1, kp2, matches):
 
     H, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, 5.0)
     return H, mask
+
+def draw_matches(i,img1,img2,kp1,kp2,good):
+    """
+    -------------------------------------------------------
+    Draws matches between two images using their keypoints and match results.
+    Use: draw_matches(i, img1, img2, kp1, kp2, good)
+    -------------------------------------------------------
+    Parameters:
+        i - index of the current match (int)
+        img1 - the first image (numpy.ndarray)
+        img2 - the second image (numpy.ndarray)
+        kp1 - keypoints of the first image (list of cv.KeyPoint)
+        kp2 - keypoints of the second image (list of cv.KeyPoint)
+        good - list of good matches
+    Returns:
+        None
+    -------------------------------------------------------"""
+    output_path = os.path.join("./Keypoints",f"S{i}-S{i+1}.jpg")
+    img3 = cv.drawMatches(img1,kp1,img2,kp2,good,None,flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+    cv.imwrite(output_path,img3)
 
 
 def warp_and_stitch(image1, image2, H):
@@ -166,10 +183,13 @@ if __name__ == "__main__":
         kp2, des2 = detect_and_describe(img2)
 
         matches = match_keypoints(des1, des2)
+        
         if len(matches) < 10:
             print("Not enough matches for stitching.")
             continue
 
+        draw_matches(i,img1,img2,kp1,kp2,matches)
+        
         H, _ = compute_homography(kp1, kp2, matches)
         stitched_image = warp_and_stitch(img2, img1, H)
         stitched_image = remove_borders(stitched_image)
