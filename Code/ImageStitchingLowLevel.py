@@ -30,7 +30,6 @@ def remove_borders(stitched_img):
     largest_contour = max(contours, key=cv.contourArea)
     x, y, w, h = cv.boundingRect(largest_contour)
     cropped_img = stitched_img[y:y + h, x:x + w]
-    cv.imwrite("stitchedOutputProcessed.png", cropped_img)
     return cropped_img
 
 
