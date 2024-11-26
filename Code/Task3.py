@@ -11,11 +11,24 @@ __updated__ = "2024-11-20"
 import cv2 as cv
 import numpy as np
 import os
-from Task2 import object_names, match_with_bounding_box
+from sklearn.cluster import DBSCAN
 
 # Constants
-DIRECTORY = "../Panorama"
-OBJECTS_DIRECTORY = "../Objects"
+DIRECTORY = "./Panorama"
+OBJECTS_DIRECTORY = "./Objects"
+
+object_names = [
+    "speed stick",
+    "seasoning",
+    "calculator",
+    "instant rice",
+    "toothpaste",
+    "dryer sheets",
+    "peanut butter",
+    "gum",
+    "old spice",
+    "gift card",
+]
 
 
 def detect_and_describe(image):
@@ -38,7 +51,7 @@ def detect_and_describe(image):
     return keypoints, descriptors
 
 
-def match_keypoints(descriptors1, descriptors2, ratio=0.80):
+def match_keypoints(descriptors1, descriptors2, ratio=0.46):
     """
     -------------------------------------------------------
     Matches descriptors between two images using FLANN-based matcher.
@@ -85,7 +98,7 @@ def compute_homography(kp1, kp2, matches):
     if len(matches) < 4:
         raise ValueError("Not enough matches to compute homography.")
 
-    num_matches = 20
+    num_matches = 10
     matches = sorted(matches, key=lambda x: x.distance)[:num_matches]
     src_pts = np.float32([kp1[match.queryIdx].pt for match in matches]).reshape(
         -1, 1, 2
@@ -114,7 +127,7 @@ def draw_matches(i, img1, img2, kp1, kp2, good):
     Returns:
         None
     -------------------------------------------------------"""
-    output_path = os.path.join("../Keypoints", f"S{i}-S{i+1}.jpg")
+    output_path = os.path.join("./Keypoints", f"S{i}-S{i+1}.jpg")
     img3 = cv.drawMatches(
         img1,
         kp1,
@@ -166,6 +179,7 @@ def stitch_images(img1, img2, homography):
     return stitched_image
 
 
+
 if __name__ == "__main__":
     panorama_input = []
     for input_image in sorted(os.listdir(DIRECTORY)):
@@ -208,29 +222,35 @@ if __name__ == "__main__":
     # cv.destroyAllWindows()
 
     pano_kp, pano_des = detect_and_describe(stitched_image)
-    for i, objectImageFile in enumerate(os.listdir(OBJECTS_DIRECTORY)):
+    for i, objectImageFile in enumerate(sorted(os.listdir(OBJECTS_DIRECTORY))):
+
         objectImage = cv.imread(os.path.join(OBJECTS_DIRECTORY, objectImageFile))
         obj_kp, obj_des = detect_and_describe(objectImage)
 
+        matches = match_keypoints(obj_des, pano_des)
+
+        homography, _ = compute_homography(obj_kp, pano_kp, matches)
+
+        draw_matches(i, objectImage, stitched_image, obj_kp, pano_kp, matches)
+
+        h, w = stitched_image.shape[:2]
+        pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
+        dst = cv.perspectiveTransform(pts, homography).reshape(-1, 2)
+
+        
+
+        x, y, w, h = cv.boundingRect(np.int32(dst))
+        stitched_image = cv.rectangle(stitched_image, (x, y), (x + w, y + h), (0,255, 0), 3, cv.LINE_AA)
+        cv.putText(
+            stitched_image,
+            object_names[i],
+            (x, y - 10),
+            cv.FONT_HERSHEY_TRIPLEX,
+            1.0,
+            (0,0, 255),
+            2,
+        )
         # Match objects to the scene
-        detected, bbox = match_with_bounding_box(obj_kp, obj_des, pano_kp, pano_des)
-        if detected:
-            x_min, y_min, x_max, y_max = bbox
-
-            # Draw bounding box
-            cv.rectangle(stitched_image, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
-
-            # Annotate with object name
-            object_name = object_names[i]
-            cv.putText(
-                stitched_image,
-                object_name,
-                (x_min, y_min - 10),
-                cv.FONT_HERSHEY_SIMPLEX,
-                0.6,
-                (0, 255, 0),
-                2,
-            )
     output_path = os.path.join(DIRECTORY, "Panorama_bb.jpg")
     cv.imwrite(output_path, stitched_image)
     print("Panorama_bb created successfully:", output_path)

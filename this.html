@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creating a Panorama with Object Detection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2B82F6',
+                        secondary: '#1E40AF',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans leading-normal">
+    <header class="bg-red-500 text-white py-12">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl font-bold mb-2">Creating a Panorama with Object Detection</h1>
+            <p class="text-xl">A Deep Dive into Image Stitching</p>
+        </div>
+    </header>
+
+    <nav class="bg-white shadow-md sticky top-0 z-10">
+        <div class="container mx-auto px-4">
+            <ul class="flex space-x-6 overflow-x-auto py-4">
+                <li><a href="#introduction" class="text-primary hover:text-secondary">Introduction</a></li>
+                <li><a href="#overview" class="text-primary hover:text-secondary">Project Overview</a></li>
+                <li><a href="#implementation" class="text-primary hover:text-secondary">Implementation</a></li>
+                <li><a href="#results" class="text-primary hover:text-secondary">Results</a></li>
+                <li><a href="#challenges" class="text-primary hover:text-secondary">Challenges</a></li>
+                <li><a href="#improvements" class="text-primary hover:text-secondary">Improvements</a></li>
+                <li><a href="#conclusion" class="text-primary hover:text-secondary">Conclusion</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8">
+        <section id="introduction" class="mb-12">
+            <h2 class="text-3xl font-bold mb-4">Introduction</h2>
+            <p class="text-lg">
+                Image stitching is a fascinating application of computer vision, enabling the creation of wide panoramas by merging multiple overlapping images. Coupled with object detection, this technique becomes a powerful tool for analyzing scenes. In this blog post, we’ll walk you through a project that builds a panorama from images, detects objects within the stitched result, and annotates them.
+            Whether you're a student working on a project, a hobbyist exploring computer vision, or a professional enhancing automation workflows, this post will offer a detailed explanation of the process, tools, and implementation.
+            </p>
+        </section>
+
+        <section id="overview" class="mb-12">
+            <h2 class="text-3xl font-bold mb-4">Project Overview</h2>
+            <ul class="list-disc pl-6 text-lg">
+                <li><strong>Image Stitching:</strong> Combining multiple images into a seamless panorama using feature detection, matching, and homography estimation.</li>
+                <li><strong>Object Detection:</strong> Identifying and bounding objects in the stitched panorama using feature matching.</li>
+            </ul>
+        </section>
+
+        <section id="implementation" class="mb-12">
+            <h2 class="text-3xl font-bold mb-4">Implementation</h2>
+            <p class="text-lg mb-4">The project is built using Python and the OpenCV library, with additional support from NumPy for matrix operations. The process is divided into several steps:</p>
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-2">1. Feature Detection and Description</h3>
+                    <p class="mb-4">Using SIFT (Scale-Invariant Feature Transform), we extract keypoints and descriptors from input images. Keypoints are significant points in the image, like corners or edges, that remain invariant to scaling and rotation.</p>
+                    <pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto"><code class="text-sm">
+def detect_and_describe(image):
+    sift = cv.SIFT_create()
+    img_gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    keypoints, descriptors = sift.detectAndCompute(img_gray, None)
+    return keypoints, descriptors
+                    </code></pre>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold mb-2">2. Feature Matching</h3>
+                    <p class="mb-4">Using FLANN (Fast Library for Approximate Nearest Neighbors), we match descriptors between overlapping images. To ensure accuracy, Lowe's ratio test is applied, which retains only those matches where the closest match is significantly better than the second closest.</p>
+                    <pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto"><code class="text-sm">
+def match_keypoints(descriptors1, descriptors2, ratio=0.80):
+    flann = cv.FlannBasedMatcher(dict(algorithm=1, trees=5), dict(checks=50))
+    matches = flann.knnMatch(descriptors1, descriptors2, k=2)
+
+    good_matches = [m for m, n in matches if m.distance < ratio * n.distance]
+    return good_matches
+                    </code></pre>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold mb-2">3. Computing Homography</h3>
+                    <p class="mb-4">With matched keypoints, we compute a homography matrix using RANSAC (Random Sample Consensus). The matrix maps the perspective of one image onto another, enabling alignment.</p>
+                    <pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto"><code class="text-sm">
+def compute_homography(kp1, kp2, matches):
+    if len(matches) < 4:
+        raise ValueError("Not enough matches to compute homography.")
+    src_pts = np.float32([kp1[m.queryIdx].pt for m in matches]).reshape(-1, 1, 2)
+    dst_pts = np.float32([kp2[m.trainIdx].pt for m in matches]).reshape(-1, 1, 2)
+    H, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, 5.0)
+    return H, mask
+                    </code></pre>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold mb-2">4. Stitching Images</h3>
+                    <p class="mb-4">Once homography is computed, we warp the second image onto the first, accounting for overlapping regions. The stitched image is then updated iteratively to include all input images.</p>
+                    <pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto"><code class="text-sm">
+def stitch_images(img1, img2, homography):
+    corners = np.array([[0, 0], [0, img2.shape[0]], [img2.shape[1], img2.shape[0]], [img2.shape[1], 0]])
+    transformed_corners = cv.perspectiveTransform(np.float32([corners]), homography)
+
+    min_x, min_y = transformed_corners.min(axis=1).astype(int)[0]
+    max_x, max_y = transformed_corners.max(axis=1).astype(int)[0]
+
+    translation_matrix = np.array([[1, 0, -min_x], [0, 1, -min_y], [0, 0, 1]])
+    stitched_image = cv.warpPerspective(img2, translation_matrix @ homography, (max_x - min_x, max_y - min_y))
+    stitched_image[-min_y:img1.shape[0]-min_y, -min_x:img1.shape[1]-min_x] = img1
+    return stitched_image
+                    </code></pre>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold mb-2">5. Object Detection</h3>
+                    <pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto"><code class="text-sm">
+for i, objectImageFile in enumerate(os.listdir(OBJECTS_DIRECTORY)):
+    objectImage = cv.imread(os.path.join(OBJECTS_DIRECTORY, objectImageFile))
+    obj_kp, obj_des = detect_and_describe(objectImage)
+
+    detected, bbox = match_with_bounding_box(obj_kp, obj_des, pano_kp, pano_des)
+    if detected:
+        x_min, y_min, x_max, y_max = bbox
+        cv.rectangle(stitched_image, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
+        object_name = object_names[i]
+        cv.putText(stitched_image, object_name, (x_min, y_min - 10), cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+                    </code></pre>
+                </div>
+            </div>
+        </section>
+
+        <section id="results" class="mb-12">
+            <h2 class="text-3xl font-bold mb-4">Results</h2>
+            <div class="space-y-4">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-2">Panorama Without Bounding Boxes</h3>
+                    <img src="/placeholder.svg?height=400&width=800" alt="Panorama without bounding boxes" class="w-full h-auto rounded-lg shadow-md">
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold mb-2">Panorama With Bounding Boxes</h3>
+                    <img src="/placeholder.svg?height=400&width=800" alt="Panorama with bounding boxes" class="w-full h-auto rounded-lg shadow-md">
+                </div>
+            </div>
+        </section>
+
+        <section id="challenges" class="mb-12">
+            <h2 class="text-3xl font-bold mb-4">Key Challenges</h2>
+            <ul class="list-disc pl-6 text-lg">
+                <li><strong>Insufficient Matches:</strong> Some images may not have enough distinctive features for reliable homography computation.</li>
+                <li><strong>Blending Artifacts:</strong> The edges between images may appear visible if blending isn't handled properly.</li>
+                <li><strong>Object Detection Accuracy:</strong> Small or overlapping objects may fail to be detected accurately.</li>
+            </ul>
+        </section>
+
+        <section id="improvements" class="mb-12">
+            <h2 class="text-3xl font-bold mb-4">Future Improvements</h2>
+            <ol class="list-decimal pl-6 text-lg">
+                <li><strong>Advanced Blending:</strong> Incorporate multi-band blending to smooth seams in the panorama.</li>
+                <li><strong>Parallelization:</strong> Use multi-threading to speed up feature extraction and matching.</li>
+                <li><strong>Real-Time Stitching:</strong> Adapt the algorithm for real-time video inputs.</li>
+            </ol>
+        </section>
+
+        <section id="conclusion" class="mb-12">
+            <h2 class="text-3xl font-bold mb-4">Conclusion</h2>
+            <p class="text-lg mb-4">
+                This project demonstrates the power of image stitching combined with object detection, achieving a
+                visually appealing and informative panorama. With applications in robotics, security, and
+                entertainment, this approach provides a solid foundation for advanced computer vision systems.
+            </p>
+            <p class="text-lg">
+                Feel free to try it out and share your results. Happy coding!
+            </p>
+        </section>
+    </main>
+
+    <footer class="bg-gray-200 text-center">
+        <div class="footer footer-center p-4 bg-base-300 text-base-content">
+            <aside>
+              <a href="http://jashandeep.co.uk">© 2024 jashandeep.co.uk</a>
+            </aside>
+          </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
