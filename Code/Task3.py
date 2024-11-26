@@ -17,6 +17,9 @@ from sklearn.cluster import DBSCAN
 DIRECTORY = "./Panorama"
 OBJECTS_DIRECTORY = "./Objects"
 
+kernel = np.array([[0, -1, 0],
+                   [-1, 5, -1],
+                   [0, -1, 0]])
 
 
 object_names = [
@@ -223,12 +226,10 @@ if __name__ == "__main__":
     # cv.waitKey(0)
     # cv.destroyAllWindows()
 
-    
     pano_kp, pano_des = detect_and_describe(stitched_image)
     for i, objectImageFile in enumerate(sorted(os.listdir(OBJECTS_DIRECTORY))):
-
         objectImage = cv.imread(os.path.join(OBJECTS_DIRECTORY, objectImageFile))
-        obj_kp, obj_des = detect_and_describe(cv.GaussianBlur(objectImage,(9,9),9))
+        obj_kp, obj_des = detect_and_describe(cv.GaussianBlur(objectImage,(9, 9), 3))
 
         matches = match_keypoints(obj_des, pano_des)
 
@@ -247,7 +248,7 @@ if __name__ == "__main__":
         cv.putText(
             stitched_image,
             object_names[i],
-            (x, y - 10),
+            (x+20, y- 30),
             cv.FONT_HERSHEY_TRIPLEX,
             1.0,
             (0,0, 255),
