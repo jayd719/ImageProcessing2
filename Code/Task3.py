@@ -3,8 +3,8 @@
 CP467 Project: Task 3
 Image Stitching
 -------------------------------------------------------
-Author:  Jashandeep Singh
-__updated__ = "2024-11-20"
+Author:  Jashandeep Singh, Nicholas Cai
+__updated__ = "2024-11-26"
 -------------------------------------------------------
 """
 
