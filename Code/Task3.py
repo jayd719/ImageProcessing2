@@ -39,8 +39,6 @@ def calculate_bounding_box(cluster_points, object_name, image_shape):
     """
     -------------------------------------------------------
     Calculates a dynamic bounding box around clustered points with padding.
-    Adjusts the bounding box size based on cluster dimensions and a padding ratio.
-    Ensures the bounding box remains within image boundaries.
     Use: x_min, y_min, x_max, y_max = calculate_bounding_box(cluster_points, object_name, image_shape, padding_ratio)
     -------------------------------------------------------
     Parameters:
@@ -274,34 +272,26 @@ if __name__ == "__main__":
         draw_matches(i, objectImage, stitched_image, obj_kp, pano_kp, matches)
 
         h, w = stitched_image.shape[:2]
-        pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(
-            -1, 1, 2
-        )
+        pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
         dst = cv.perspectiveTransform(pts, homography).reshape(-1, 2)
 
-        # Extract coordinates of matches for clustering
         matches_coords = []
         for match in matches:
             # Get the keypoints from both images
             obj_pt = obj_kp[match.queryIdx].pt
             pano_pt = pano_kp[match.trainIdx].pt
-            matches_coords.append(
-                pano_pt
-            )  # Use points from the panorama (stitched image)
+            matches_coords.append(pano_pt)
 
         matches_coords = np.array(matches_coords)
 
-        # Apply DBSCAN clustering
         clustering = DBSCAN(eps=30, min_samples=3).fit(matches_coords)
         labels = clustering.labels_
 
-        # Find the largest cluster
         unique_labels = set(labels)
         largest_cluster_id = max(
             unique_labels, key=lambda label: list(labels).count(label)
         )
 
-        # Extract points belonging to the largest cluster
         cluster_points = matches_coords[labels == largest_cluster_id]
 
         # Calculate bounding rectangle
