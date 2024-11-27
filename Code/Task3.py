@@ -36,6 +36,25 @@ object_names = [
 
 
 def calculate_bounding_box(cluster_points, object_name, image_shape):
+    """
+    -------------------------------------------------------
+    Calculates a dynamic bounding box around clustered points with padding.
+    Adjusts the bounding box size based on cluster dimensions and a padding ratio.
+    Ensures the bounding box remains within image boundaries.
+    Use: x_min, y_min, x_max, y_max = calculate_bounding_box(cluster_points, object_name, image_shape, padding_ratio)
+    -------------------------------------------------------
+    Parameters:
+        cluster_points - the points in the cluster (numpy.ndarray, shape: N x 2)
+        object_name - the name of the object (str, optional for future extensions)
+        image_shape - the shape of the image as (height, width) (tuple)
+        padding_ratio - the ratio of padding around the bounding box (float, default: 0.4)
+    Returns:
+        x_min - the minimum x-coordinate of the bounding box (int)
+        y_min - the minimum y-coordinate of the bounding box (int)
+        x_max - the maximum x-coordinate of the bounding box (int)
+        y_max - the maximum y-coordinate of the bounding box (int)
+    -------------------------------------------------------
+    """
     padding_ratio = 0.4
     x_min, y_min = np.min(cluster_points, axis=0).astype(int)
     x_max, y_max = np.max(cluster_points, axis=0).astype(int)
