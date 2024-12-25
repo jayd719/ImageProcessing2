@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Stitching and Object Detection</title>
+    <link rel="stylesheet" href="https://jayd719.github.io/assets/reports/report.css">
+</head>
+
+<body>
+    <section style="max-width: 1200px; margin: auto;">
+        <h1>Image Stitching and Object Detection</h1>
+        <hr>
+        <div style="display: flex;">
+            <div>
+                <figure><img width="100%" src="../Panorama_Testing/TestSet2/1.png" alt="">
+                    <figcaption>Input Image 1</figcaption>
+                </figure>
+                <figure><img width="100%" src="../Panorama_Testing/TestSet2/2.png" alt="">
+                    <figcaption>Input Image 2</figcaption>
+                </figure>
+            </div>
+            <div style="display: flex; align-items: center;">
+                <figure width="50%"><img width="100%" src="../Panorama_Testing/TestSet2/Panorama.jpg" alt="">
+                    <figcaption>Output Image</figcaption>
+                </figure>
+            </div>
+
+        </div>
+
+
+        <div id="index"></div>
+        <h3>Overview</h3>
+        <p>This project explores advanced computer vision techniques to develop a system for image stitching and object
+            detection. The primary goal is to create a seamless panoramic image from multiple overlapping input images
+            and to identify and localize objects within the stitched panorama.</p>
+
+        <h3>Introduction</h3>
+        <p>The Enhanced Image Stitching and Object Detection project combines state-of-the-art computer vision
+            algorithms to
+            address two key tasks: image stitching and object detection. Using SIFT (Scale-Invariant Feature Transform)
+            for
+            feature detection, homography for image alignment, and DBSCAN clustering for object localization, this
+            project
+            provides a modular approach to creating detailed panoramic views while identifying and labeling objects. By
+            dynamically handling user inputs and generating intermediate visualizations, the project is suitable for
+            academic exploration and practical deployments.</p>
+
+        <h3>Objectives</h3>
+        <ul>
+            <li>Develop a robust system to stitch multiple overlapping images into a seamless panorama.</li>
+            <li>Implement object detection to locate and label objects in the stitched panorama.</li>
+            <li>Provide intermediate visualizations for debugging and understanding algorithmic steps.</li>
+            <li>Ensure scalability and adaptability of the system for various use cases.</li>
+        </ul>
+
+        <h3>Methodology</h3>
+        <h4>1. Image Stitching</h4>
+        <ul>
+            <li><strong>Feature Detection</strong>: SIFT is used to detect and describe keypoints in the input images.
+            </li>
+            <li><strong>Keypoint Matching</strong>: FLANN-based matching and Lowe's ratio test are applied to find
+                correspondences between images.</li>
+            <li><strong>Homography Calculation</strong>: RANSAC is used to compute the homography matrix, aligning
+                overlapping images.</li>
+            <li><strong>Stitching</strong>: The homography is applied to warp and blend images into a single panoramic
+                view.
+            </li>
+        </ul>
+
+        <h4>2. Object Detection</h4>
+        <ul>
+            <li><strong>Feature Matching</strong>: Object images are matched against the panorama using SIFT and
+                FLANN-based
+                matching.</li>
+            <li><strong>Clustering</strong>: DBSCAN groups matched points to identify object locations in the panorama.
+            </li>
+            <li><strong>Bounding Box Calculation</strong>: Dynamic bounding boxes are computed around detected clusters.
+            </li>
+            <li><strong>Visualization</strong>: Labels and bounding boxes are drawn on the panorama for clarity.</li>
+        </ul>
+
+        <h3>Implementation</h3>
+        <p>
+            The script begins by prompting the user for directories containing panorama images and objects. It loads and
+            processes the panorama images using SIFT to detect keypoints, match descriptors, and compute homographies to
+            iteratively stitch
+            images into a panorama. After creating the panorama, the script processes object images by detecting
+            features, matching
+            them with the panorama, and clustering match coordinates using DBSCAN to identify object locations. Bounding
+            boxes are
+            calculated and drawn around detected objects, labeled with predefined names. Finally, the stitched panorama
+            and the
+            annotated panorama are saved to disk, and the user is notified of the process completion.
+        </p>
+        <ol>
+            <li>Input directories for panorama images and object images are specified by the user.</li>
+            <li>The system iteratively processes the images for stitching, saving intermediate keypoint visualizations.
+            </li>
+            <li>The stitched panorama is analyzed for object detection, with results saved as an annotated image.</li>
+            <li>Outputs include the stitched panorama (<code>Panorama.jpg</code>) and the annotated panorama
+                (<code>Panorama_bb.jpg</code>).</li>
+        </ol>
+
+        <figure>
+            <img src="./sw.svg" alt="">
+        </figure>
+
+        <h3>Installation</h3>
+        <ol>
+            <li>Clone this repository:
+                <pre><code>git clone https://github.com/jayd719/enhanced-image-stitching.git</code></pre>
+            </li>
+            <li>Navigate To Project Folder:
+                <pre><code>cd enhanced-image-stitching</code></pre>
+            </li>
+            <li>Install the required Python libraries:
+                <pre><code>pip install -r requirements.txt</code></pre>
+            </li>
+        </ol>
+
+        <h4>Requirements</h4>
+        <ul>
+            <li>Python 3.7+</li>
+            <li>Libraries:
+                <ul>
+                    <li>OpenCV</li>
+                    <li>NumPy</li>
+                    <li>scikit-learn</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3>Usage</h3>
+        <ol>
+            <li>Place the input images for stitching in a directory (e.g., <code>./Panorama</code>).</li>
+            <li>Place the object images in another directory (e.g., <code>./Objects</code>).</li>
+            <li>Run the script:
+                <pre><code>python image_stitching_enhanced.py</code></pre>
+            </li>
+            <li>Follow the prompts to specify the directories for the panorama and objects. The default directories are
+                <code>./Panorama</code> and <code>./Objects</code>.
+            </li>
+            <li>The output files will be saved in the <code>./Panorama</code> directory:
+                <ul>
+                    <li><code>Panorama.jpg</code>: The stitched panorama.</li>
+                    <li><code>Panorama_bb.jpg</code>: The panorama with bounding boxes and labels for detected objects.
+                    </li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>Project Structure</h3>
+        <ul>
+            <li><code>image_stitching_enhanced.py</code>: The main script for stitching images and detecting objects.
+            </li>
+            <li><code>./Panorama</code>: Default directory for input panorama images and output stitched panoramas.</li>
+            <li><code>./Objects</code>: Default directory for input object images.</li>
+            <li><code>./Keypoints</code>: Directory for intermediate visualization of keypoint matches.</li>
+        </ul>
+
+        <h3>Results</h3>
+        <ul>
+            <li>
+                Panorama Creation from Two Images Aligned on the Same Y-Axis Level of the Camera
+                <div>
+                    <div style="display: flex;">
+                        <figure><img width="100%" src="/Panorama_Testing/TestSet1/1.png" alt="">
+                            <figcaption>Input Image 1</figcaption>
+                        </figure>
+                        <figure><img width="100%" src="/Panorama_Testing/TestSet1/2.png" alt="">
+                            <figcaption>Input Image 2</figcaption>
+                        </figure>
+                    </div>
+                    <div>
+                        <figure><img width="100%" src="/Panorama_Testing/TestSet1/Panorama.jpg" alt="">
+                            <figcaption>Resultant Panorama</figcaption>
+                        </figure>
+                    </div>
+                </div>
+            </li>
+
+
+            <li>
+                <div>
+                    <div style="display: flex;">
+                        <figure><img width="100%" src="/Panorama_Testing/Panorama/S1.png" alt="">
+                            <figcaption>Input Image 1</figcaption>
+                        </figure>
+
+                        <figure><img width="100%" src="/Panorama_Testing/Panorama/S3.png" alt="">
+                            <figcaption>Input Image 2</figcaption>
+                        </figure>
+
+                        <figure><img width="100%" src="/Panorama_Testing/Panorama/S5.png" alt="">
+                            <figcaption>Input Image 3</figcaption>
+                        </figure>
+
+                        <figure><img width="100%" src="/Panorama_Testing/Panorama/S7.png" alt="">
+                            <figcaption>Input Image 4</figcaption>
+                        </figure>
+                    </div>
+
+                    <div>
+                        <figure><img width="100%" src="/Panorama_Testing/Panorama/Panorama.jpg" alt="">
+                            <figcaption>Resultant Panorama</figcaption>
+                        </figure>
+                    </div>
+                </div>
+            </li>
+
+            <li>
+                <div style="display: flex;">
+                    <div>
+                        <figure><img width="100%" src="../Panorama_Testing/TestSet2/1.png" alt="">
+                            <figcaption>Input Image 1</figcaption>
+                        </figure>
+                        <figure><img width="100%" src="../Panorama_Testing/TestSet2/2.png" alt="">
+                            <figcaption>Input Image 2</figcaption>
+                        </figure>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <figure width="50%"><img width="100%" src="../Panorama_Testing/TestSet2/Panorama.jpg" alt="">
+                            <figcaption>Output Image</figcaption>
+                        </figure>
+                    </div>
+
+                </div>
+            </li>
+
+            <li>
+                <div>
+                    <div style="display: flex;">
+                        <figure><img width="100%" src="../Panorama/S1.jpg" alt="">
+                            <figcaption>Input Image 1</figcaption>
+                        </figure>
+
+                        <figure><img width="100%" src="../Panorama/S2.jpg" alt="">
+                            <figcaption>Input Image 2</figcaption>
+                        </figure>
+
+                        <figure><img width="100%" src="../Panorama/S3.jpg" alt="">
+                            <figcaption>Input Image 3</figcaption>
+                        </figure>
+
+                        <figure><img width="100%" src="../Panorama/S4.jpg" alt="">
+                            <figcaption>Input Image 4</figcaption>
+                        </figure>
+                    </div>
+
+                    <div>
+                        <figure><img width="100%" src="../Panorama/Panorama.jpg" alt="">
+                            <figcaption>Resultant Panorama</figcaption>
+                        </figure>
+                    </div>
+                </div>
+            </li>
+
+            <li>
+                <figure><img width="100%" src="../Panorama/Panorama_bb.jpg" alt="">
+                    <figcaption>Object Detection</figcaption>
+                </figure>
+            </li>
+        </ul>
+
+
+
+        <h3>Future Work</h3>
+        <ul>
+            <li>Add support for non-planar and 360-degree panoramas using video stream.</li>
+        </ul>
+
+        <h3>Conclusion</h3>
+        <p>This project successfully combines image stitching and object detection into a unified system. The use of
+            advanced computer vision algorithms and modular implementation ensures versatility and robustness. The
+            system
+            demonstrates significant potential for real-world applications and serves as a foundation for future
+            enhancements.</p>
+
+        <h3>Acknowledgements</h3>
+        <ul>
+            <li><a href="https://docs.opencv.org/">OpenCV Documentation</a></li>
+            <li><a href="https://scikit-learn.org/">scikit-learn Documentation</a></li>
+        </ul>
+    </section>
+    <div style="padding: 2%; text-align: center;">
+        <a href="https://jashandeep.co.uk">© 2024 jashandeep.co.uk</a>
+    </div>
+    <script src="https://jayd719.github.io/assets/reports/index.js"></script>
+</body>
+
+</html>

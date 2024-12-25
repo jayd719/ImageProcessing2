@@ -1,0 +1,54 @@
+@startuml "sw"
+actor User
+participant "Main Script" as Main
+participant "Image Processor" as ImageProcessor
+participant "Object Processor" as ObjectProcessor
+participant "Disk" as Disk
+
+User -> Main: Run the script
+Main -> User: Prompt for panorama directory
+User -> Main: Provide panorama directory
+Main -> User: Prompt for objects directory
+User -> Main: Provide objects directory
+
+Main -> Disk: Load panorama images
+Disk --> Main: Panorama images
+
+alt Not enough images
+    Main -> User: Display error message
+    return
+end
+
+Main -> ImageProcessor: process_images(panorama_input)
+loop For each pair of images
+    ImageProcessor -> ImageProcessor: detect_and_describe(img1, img2)
+    ImageProcessor -> ImageProcessor: match_keypoints(des1, des2)
+    alt Not enough matches
+        ImageProcessor -> Main: Skip current pair
+    else
+        ImageProcessor -> ImageProcessor: compute_homography()
+        ImageProcessor -> ImageProcessor: stitch_images(img1, img2)
+    end
+end
+ImageProcessor --> Main: Stitched panorama
+
+Main -> Disk: Save Panorama.jpg
+
+Main -> ObjectProcessor: process_objects(objects_directory, stitched_image)
+loop For each object image
+    ObjectProcessor -> ObjectProcessor: detect_and_describe(objectImage)
+    ObjectProcessor -> ObjectProcessor: match_keypoints(obj_des, pano_des)
+    alt Not enough matches
+        ObjectProcessor -> Main: Skip current object
+    else
+        ObjectProcessor -> ObjectProcessor: compute_homography()
+        ObjectProcessor -> ObjectProcessor: DBSCAN clustering
+        ObjectProcessor -> ObjectProcessor: calculate_bounding_box()
+        ObjectProcessor -> ObjectProcessor: Annotate panorama
+    end
+end
+ObjectProcessor --> Main: Annotated panorama
+
+Main -> Disk: Save Panorama_bb.jpg
+Main -> User: Notify completion
+@enduml

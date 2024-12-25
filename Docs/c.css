@@ -1,0 +1,215 @@
+@import url("https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap");
+
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  color: #333;
+  font-family: "Source Sans 3", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  background-color: #f9fafb;
+  scroll-behavior: smooth;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark-mode {
+  background-color: #121212;
+  color: #e4e4e4;
+}
+
+/* Layout */
+main {
+  padding: 20px;
+  margin: 20px auto;
+  background: #fff;
+  border-radius: 12px;
+  max-width: 900px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+body.dark-mode main {
+  background: #1e1e1e;
+  border-color: #333;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5 {
+  color: #222;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
+h1 {
+  font-size: 3rem;
+  text-align: center;
+}
+
+h2 {
+  font-size: 2.5rem;
+  margin-top: 40px;
+}
+
+h3 {
+  font-size: 1.8rem;
+  margin-top: 20px;
+}
+
+h4 {
+  font-size: 1.5rem;
+}
+
+h5 {
+  font-size: 1.25rem;
+}
+
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4, body.dark-mode h5 {
+  color: #f4f4f4;
+}
+
+/* Typography */
+p {
+  text-align: justify;
+  line-height: 1.6;
+  margin: 15px 0;
+  font-size: 1rem;
+  color: #444;
+}
+
+body.dark-mode p {
+  color: #d4d4d4;
+}
+
+a {
+  color: #1d4ed8;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: #0b60d5;
+  text-decoration: underline;
+}
+
+body.dark-mode a {
+  color: #90caf9;
+}
+
+/* Buttons */
+button {
+  background-color: #4f46e5;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #4338ca;
+}
+
+body.dark-mode button {
+  background-color: #6d28d9;
+}
+
+/* Lists */
+ul, ol {
+  padding-left: 40px;
+  margin-bottom: 20px;
+  color: #444;
+}
+
+body.dark-mode ul, body.dark-mode ol {
+  color: #ccc;
+}
+
+/* Code and Preformatted Text */
+pre {
+  margin: 20px auto;
+  background-color: #f3f4f6;
+  padding: 15px;
+  border-radius: 10px;
+  overflow-x: auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: "Courier New", monospace;
+  font-size: 0.95rem;
+}
+
+code {
+  font-family: "Courier New", monospace;
+  font-weight: bold;
+  color: #b91c1c;
+  background-color: #f3f4f6;
+  padding: 3px 6px;
+  border-radius: 6px;
+}
+
+body.dark-mode pre {
+  background-color: #262626;
+}
+
+body.dark-mode code {
+  background-color: #333;
+  color: #ff7878;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  margin: 20px auto;
+  border-collapse: collapse;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+th, td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+th {
+  background-color: #f3f4f6;
+  color: #333;
+  font-weight: 700;
+}
+
+td {
+  background-color: #fff;
+}
+
+body.dark-mode th {
+  background-color: #333;
+  color: #f4f4f4;
+}
+
+body.dark-mode td {
+  background-color: #1f1f1f;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 20px;
+  margin-top: 20px;
+  background-color: #f3f4f6;
+  border-top: 1px solid #e5e7eb;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+body.dark-mode footer {
+  background-color: #1f1f1f;
+  color: #aaa;
+}
