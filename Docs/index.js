@@ -13,7 +13,7 @@ function generateIndex(containerId = "index") {
         container.id = containerId;
         document.body.insertBefore(container, document.body.firstChild);
     }
-    container.innerHTML = `<h1 class="py-5 font-bold text-2xl text-secondary">${document.querySelector("h1").innerText}</h1>
+    container.innerHTML = `<h1 class="pt-5 mb-2 font-bold text-2xl text-primary">${document.querySelector("h1").innerText}</h1>
     <h3 style='margin-top:15px;'>Table of Contents</h3>`;
 
     const indexList = document.createElement("ul");
