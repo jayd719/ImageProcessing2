@@ -5,13 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Stitching and Object Detection</title>
-    <link rel="stylesheet" href="https://jayd719.github.io/assets/reports/report.css">
-</head>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.22/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
 
-<body>
+</head>
+<style>
+    .roboto-regular {
+        font-family: "Roboto", serif;
+        font-weight: 400;
+        font-style: normal;
+    }
+</style>
+
+<body class="oswald">
+
     <section style="max-width: 1200px; margin: auto;">
+
         <h1>Image Stitching and Object Detection</h1>
+        <div id="techs"></div>
+
         <hr>
+
         <div style="display: flex;">
             <div>
                 <figure><img width="70%" src="../Panorama_Testing/TestSet2/1.png" alt="">
@@ -30,13 +44,13 @@
         </div>
 
 
-        <div id="index"></div>
-        <h3>Overview</h3>
+
+        <h2>Overview</h2>
         <p>This project explores advanced computer vision techniques to develop a system for image stitching and object
             detection. The primary goal is to create a seamless panoramic image from multiple overlapping input images
             and to identify and localize objects within the stitched panorama.</p>
 
-        <h3>Introduction</h3>
+        <h2>Introduction</h2>
         <p>The Enhanced Image Stitching and Object Detection project combines state-of-the-art computer vision
             algorithms to
             address two key tasks: image stitching and object detection. Using SIFT (Scale-Invariant Feature Transform)
@@ -47,7 +61,7 @@
             dynamically handling user inputs and generating intermediate visualizations, the project is suitable for
             academic exploration and practical deployments.</p>
 
-        <h3>Objectives</h3>
+        <h2>Objectives</h2>
         <ul>
             <li>Develop a robust system to stitch multiple overlapping images into a seamless panorama.</li>
             <li>Implement object detection to locate and label objects in the stitched panorama.</li>
@@ -55,7 +69,7 @@
             <li>Ensure scalability and adaptability of the system for various use cases.</li>
         </ul>
 
-        <h3>Methodology</h3>
+        <h2>Methodology</h2>
         <h4>1. Image Stitching</h4>
         <ul>
             <li><strong>Feature Detection</strong>: SIFT is used to detect and describe keypoints in the input images.
@@ -81,7 +95,7 @@
             <li><strong>Visualization</strong>: Labels and bounding boxes are drawn on the panorama for clarity.</li>
         </ul>
 
-        <h3>Implementation</h3>
+        <h2>Implementation</h2>
         <p>
             The script begins by prompting the user for directories containing panorama images and objects. It loads and
             processes the panorama images using SIFT to detect keypoints, match descriptors, and compute homographies to
@@ -107,7 +121,7 @@
             <img width="60%" src="./sw.svg" alt="">
         </figure>
 
-        <h3>Installation</h3>
+        <h2>Installation</h2>
         <ol>
             <li>Clone this repository:
                 <pre><code>git clone https://github.com/jayd719/enhanced-image-stitching.git</code></pre>
@@ -132,7 +146,7 @@
             </li>
         </ul>
 
-        <h3>Usage</h3>
+        <h2>Usage</h2>
         <ol>
             <li>Place the input images for stitching in a directory (e.g., <code>./Panorama</code>).</li>
             <li>Place the object images in another directory (e.g., <code>./Objects</code>).</li>
@@ -151,7 +165,7 @@
             </li>
         </ol>
 
-        <h3>Project Structure</h3>
+        <h2>Project Structure</h2>
         <ul>
             <li><code>image_stitching_enhanced.py</code>: The main script for stitching images and detecting objects.
             </li>
@@ -160,7 +174,7 @@
             <li><code>./Keypoints</code>: Directory for intermediate visualization of keypoint matches.</li>
         </ul>
 
-        <h3>Results</h3>
+        <h2>Results</h2>
         <ul>
             <li>
                 Panorama Creation from Two Images Aligned on the Same Y-Axis Level of the Camera
@@ -273,19 +287,19 @@
 
 
 
-        <h3>Future Work</h3>
+        <h2>Future Work</h2>
         <ul>
             <li>Add support for non-planar and 360-degree panoramas using video stream.</li>
         </ul>
 
-        <h3>Conclusion</h3>
+        <h2>Conclusion</h2>
         <p>This project successfully combines image stitching and object detection into a unified system. The use of
             advanced computer vision algorithms and modular implementation ensures versatility and robustness. The
             system
             demonstrates significant potential for real-world applications and serves as a foundation for future
             enhancements.</p>
 
-        <h3>Acknowledgements</h3>
+        <h2>Acknowledgements</h2>
         <ul>
             <li><a href="https://docs.opencv.org/">OpenCV Documentation</a></li>
             <li><a href="https://scikit-learn.org/">scikit-learn Documentation</a></li>
@@ -294,7 +308,9 @@
     <div style="padding: 2%; text-align: center;">
         <a href="https://jashandeep.co.uk">© 2024 jashandeep.co.uk</a>
     </div>
-    <script src="https://jayd719.github.io/assets/reports/index.js"></script>
+    <script src="app.js"></script>
+    <script src="index.js"></script>
+    <script src="https://jayd719.github.io/staticfiles/themeChanger.js"></script>
 </body>
 
 </html>
